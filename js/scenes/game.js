@@ -5,6 +5,7 @@ const CANDY_SPACING = 175;
 
 let candies = [];
 let candy;
+let mContext;
 
 
 export class Game extends Phaser.Scene {
@@ -18,7 +19,8 @@ export class Game extends Phaser.Scene {
         let spacing_y = 100;
         let candy_count = 0;
         while (candy_count < 20){
-            candy = this.add.sprite(spacing_x, spacing_y, CANDY_NAMES[this.getRandomInt(CANDY_NAMES.length)]).setScale(.28);
+            candy = this.physics.add.sprite(spacing_x, spacing_y, CANDY_NAMES[this.getRandomInt(CANDY_NAMES.length)]).setScale(.28);
+            candy.name = candy_count;
             candies.push(candy);
 
             spacing_x += CANDY_SPACING;
@@ -33,7 +35,17 @@ export class Game extends Phaser.Scene {
     }
 
     create (){
-        
+        mContext = this;
+        candies.forEach(($candy) => {
+            $candy.setInteractive({ draggable: true , dropZone: true });
+            $candy.on('drag', function(pointer, localX, localY){
+                console.log('drag', $candy.name);
+            }, mContext);
+
+            $candy.on('dragover', function(pointer, gameObject){
+                console.log('draover', gameObject.name);
+            }, mContext);
+        });
     } 
 
     update(){
@@ -42,5 +54,9 @@ export class Game extends Phaser.Scene {
 
     getRandomInt(max){
         return Math.floor(Math.random() * max);
+    }
+
+    candyMoveX($moved, $target){
+        console.log($moved, $target);
     }
 }
