@@ -5,8 +5,9 @@ const CANDY_SPACING = 175;
 
 let candies = [];
 let candy;
-let mContext;
+let allowMove = true;
 
+let mContext;
 
 export class Game extends Phaser.Scene {
     constructor ()
@@ -29,21 +30,31 @@ export class Game extends Phaser.Scene {
             if (candy_count != 0 && candy_count % 4 === 0){
                 spacing_y+= CANDY_SPACING;
                 spacing_x = 100;
-                console.log(candy_count);
             }
         }
     }
 
     create (){
         mContext = this;
-        candies.forEach(($candy) => {
-            $candy.setInteractive({ draggable: true , dropZone: true });
-            $candy.on('drag', function(pointer, localX, localY){
-                console.log('drag', $candy.name);
+        let dragCandy, dragoverCandy;
+        candies.forEach((candy) => {
+            candy.setInteractive({ draggable: true , dropZone: true });
+            candy.on('drag', function(pointer, localX, localY){
+                dragCandy = candy;
             }, mContext);
 
-            $candy.on('dragover', function(pointer, gameObject){
-                console.log('draover', gameObject.name);
+            candy.on('dragover', function(pointer, gameObject){
+                if (dragCandy !== gameObject){
+                    if (allowMove){
+                        console.log('move');
+                        this.candyMove(dragCandy, gameObject);
+
+                        allowMove = !allowMove;
+                        setTimeout(() => {
+                            allowMove = !allowMove;
+                        }, 1000);
+                    }
+                }
             }, mContext);
         });
     } 
@@ -56,7 +67,26 @@ export class Game extends Phaser.Scene {
         return Math.floor(Math.random() * max);
     }
 
-    candyMoveX($moved, $target){
-        console.log($moved, $target);
+    candyMove(moved, target){
+        let movedX = moved.x;        
+        let movedY = moved.y;
+
+        let targetX = target.x;
+
+        let movedXInterval = setInterval(() => {
+            moved.x += 3; 
+            if (Math.floor(moved.x) >= targetX || moved.x > 720)  {
+                clearInterval(movedXInterval);
+                moved.x = targetX;
+            }
+        }, 4);
+
+        let targetXInterval = setInterval(() => {
+            target.x -= 3; 
+            if (Math.floor(target.x) <= movedX || target.x < 0)  {
+                clearInterval(targetXInterval);
+                target.x = movedX;
+            }
+        }, 4);
     }
 }
