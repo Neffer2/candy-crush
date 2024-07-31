@@ -36,7 +36,7 @@ export class Game extends Phaser.Scene {
 
     create (){
         mContext = this;
-        let dragCandy, dragoverCandy;
+        let dragCandy;
         candies.forEach((candy) => {
             candy.setInteractive({ draggable: true , dropZone: true });
             candy.on('drag', function(pointer, localX, localY){
@@ -51,8 +51,8 @@ export class Game extends Phaser.Scene {
 
                         allowMove = !allowMove;
                         setTimeout(() => {
-                            allowMove = !allowMove;
-                        }, 1000);
+                            allowMove = !allowMove
+                        }, 500);
                     }
                 }
             }, mContext);
@@ -70,23 +70,96 @@ export class Game extends Phaser.Scene {
     candyMove(moved, target){
         let movedX = moved.x;        
         let movedY = moved.y;
-
         let targetX = target.x;
+        let targetY = target.y;
 
-        let movedXInterval = setInterval(() => {
-            moved.x += 3; 
-            if (Math.floor(moved.x) >= targetX || moved.x > 720)  {
-                clearInterval(movedXInterval);
-                moved.x = targetX;
-            }
-        }, 4);
+        console.log(movedX);
+        console.log(movedY);
+        console.log("**********");
+        console.log(targetX);
+        console.log(targetY);
 
-        let targetXInterval = setInterval(() => {
-            target.x -= 3; 
-            if (Math.floor(target.x) <= movedX || target.x < 0)  {
-                clearInterval(targetXInterval);
-                target.x = movedX;
-            }
-        }, 4);
+        // Movements
+        let moveRight = false, moveLeft = false, moveUp = false, moveDown = false, diagonal = false;
+
+        if ((movedX < targetX && movedY < targetY) || 
+            (movedX > targetX && movedY > targetY) ||
+            (movedX === targetY && movedY === targetX)){
+            diagonal = true;
+        }else if (movedX < targetX){
+            moveRight = true;
+        }else if(movedX > targetX){
+            moveLeft = true;
+        }else if(movedY < targetY){
+            moveDown = true;
+        }else if(movedY > targetY){
+            moveUp = true;
+        }
+
+        if (moveRight){
+            let movedXInterval = setInterval(() => {
+                moved.x += 3; 
+                if (Math.floor(moved.x) >= targetX || moved.x > 720)  {
+                    clearInterval(movedXInterval);
+                    moved.x = targetX;
+                }
+            }, 4);
+    
+            let targetXInterval = setInterval(() => {
+                target.x -= 3; 
+                if (Math.floor(target.x) <= movedX || target.x < 0)  {
+                    clearInterval(targetXInterval);
+                    target.x = movedX;
+                }
+            }, 4);
+        }else if (moveLeft){
+            let movedXInterval = setInterval(() => {
+                moved.x -= 3; 
+                if (Math.floor(moved.x) <= targetX || moved.x > 720)  {
+                    clearInterval(movedXInterval);
+                    moved.x = targetX;
+                }
+            }, 4);
+    
+            let targetXInterval = setInterval(() => {
+                target.x += 3; 
+                if (Math.floor(target.x) >= movedX || target.x < 0)  {
+                    clearInterval(targetXInterval);
+                    target.x = movedX;
+                }
+            }, 4);
+        }else if (moveUp){
+            let movedYInterval = setInterval(() => {
+                moved.y -= 3; 
+                if (Math.floor(moved.y) <= targetY || moved.y < 0){
+                    clearInterval(movedYInterval);
+                    moved.y = targetY;
+                }
+            }, 4);
+    
+            let targetYInterval = setInterval(() => {
+                target.y += 3; 
+                if (Math.floor(target.y) >= movedY || target.y > 1280){
+                    clearInterval(targetYInterval);
+                    target.y = movedY;
+                }
+            }, 4);
+        }else if (moveDown){
+            let movedYInterval = setInterval(() => {
+                moved.y += 3; 
+                if (Math.floor(moved.y) >= targetY || moved.y > 1280){
+                    clearInterval(movedYInterval);
+                    moved.y = targetY;
+                }
+            }, 4);
+    
+            let targetYInterval = setInterval(() => {
+                target.y -= 3; 
+                if (Math.floor(target.y) <= movedY || target.y < 0){
+                    clearInterval(targetYInterval);
+                    target.y = movedY;
+                }
+            }, 4);
+        }
     }
 }
