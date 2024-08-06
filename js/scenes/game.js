@@ -36,23 +36,21 @@ export class Game extends Phaser.Scene {
 
     create (){
         mContext = this;
-        let dragCandy;
+        let draggedCandy;
+        
         candies.forEach((candy) => {
             candy.setInteractive({ draggable: true , dropZone: true });
             candy.on('drag', function(pointer, localX, localY){
-                dragCandy = candy;
+                draggedCandy = candy;
             }, mContext);
 
             candy.on('dragover', function(pointer, gameObject){
-                if (dragCandy !== gameObject){
+                if (draggedCandy !== gameObject){
                     if (allowMove){
-                        console.log('move');
-                        this.candyMove(dragCandy, gameObject);
+                        this.candyMove(draggedCandy, gameObject);
 
                         allowMove = !allowMove;
-                        setTimeout(() => {
-                            allowMove = !allowMove
-                        }, 500);
+                        setTimeout(() => { allowMove = !allowMove; }, 500);
                     }
                 }
             }, mContext);
@@ -73,20 +71,26 @@ export class Game extends Phaser.Scene {
         let targetX = target.x;
         let targetY = target.y;
 
-        console.log(movedX);
-        console.log(movedY);
+        console.log("X: "+movedX);
+        console.log("Y: "+movedY);
         console.log("**********");
-        console.log(targetX);
-        console.log(targetY);
+        console.log("X: "+targetX);
+        console.log("Y: "+targetY);
+        console.log("\n");
 
         // Movements
-        let moveRight = false, moveLeft = false, moveUp = false, moveDown = false, diagonal = false;
+        let moveRight = false, moveLeft = false, moveUp = false, moveDown = false, noMovement = false;
 
+        // Validate diagonals, and no movement events  
         if ((movedX < targetX && movedY < targetY) || 
             (movedX > targetX && movedY > targetY) ||
-            (movedX === targetY && movedY === targetX)){
-            diagonal = true;
-        }else if (movedX < targetX){
+            ((movedX + movedY) - (targetX + targetY) < -175) ||
+            ((movedX + movedY) - (targetX + targetY) > 175) ||
+            (movedX === targetY && movedY === targetX) ||
+            ((movedX - targetX) + (movedY - targetY) === 0)){
+            noMovement = true;
+        }
+        else if (movedX < targetX){
             moveRight = true;
         }else if(movedX > targetX){
             moveLeft = true;
