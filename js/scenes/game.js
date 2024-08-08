@@ -19,8 +19,8 @@ export class Game extends Phaser.Scene {
         let spacing_x = 100;
         let spacing_y = 100;
         let candy_count = 0;
-        while (candy_count < 20){
-            candy = this.physics.add.sprite(spacing_x, spacing_y, CANDY_NAMES[this.getRandomInt(CANDY_NAMES.length)]).setScale(.28);
+        while (candy_count < 28){
+            candy = this.physics.add.sprite(spacing_x, spacing_y, CANDY_NAMES[this.getRandomInt(CANDY_NAMES.length)]).setScale(.29);
             candy.name = candy_count;
             candies.push(candy);
 
@@ -38,8 +38,9 @@ export class Game extends Phaser.Scene {
         mContext = this;
         let draggedCandy;
         
-        candies.forEach((candy) => {
+        candies.forEach((candy) => { 
             candy.setInteractive({ draggable: true , dropZone: true });
+
             candy.on('drag', function(pointer, localX, localY){
                 draggedCandy = candy;
             }, mContext);
@@ -47,10 +48,20 @@ export class Game extends Phaser.Scene {
             candy.on('dragover', function(pointer, gameObject){
                 if (draggedCandy !== gameObject){
                     if (allowMove){
-                        this.candyMove(draggedCandy, gameObject);
+                        allowMove = false;
 
-                        allowMove = !allowMove;
-                        setTimeout(() => { allowMove = !allowMove; }, 500);
+                        this.candyMove(draggedCandy, gameObject)
+                        .then((result) => {
+                            if(result.movement){
+                                setTimeout(() => { return this.candyMove(result.movedTo, result.moved); }, 500);
+                            }
+                        })
+                        .then((reverseResult) => {
+                            setTimeout(() => { allowMove = true; }, 800);
+                        })
+                        .catch((error) => {
+                            console.error('Error en el movimiento:', error);
+                        });
                     }
                 }
             }, mContext);
@@ -69,15 +80,9 @@ export class Game extends Phaser.Scene {
         let movedX = moved.x;        
         let movedY = moved.y;
         let targetX = target.x;
-        let targetY = target.y;
+        let targetY = target.y;   
 
-        console.log("X: "+movedX);
-        console.log("Y: "+movedY);
-        console.log("**********");
-        console.log("X: "+targetX);
-        console.log("Y: "+targetY);
-        console.log("\n");
-
+        this.swap(candies, moved.name, target.name);
         // Movements
         let moveRight = false, moveLeft = false, moveUp = false, moveDown = false, noMovement = false;
 
@@ -100,70 +105,86 @@ export class Game extends Phaser.Scene {
             moveUp = true;
         }
 
-        if (moveRight){
-            let movedXInterval = setInterval(() => {
-                moved.x += 3; 
-                if (Math.floor(moved.x) >= targetX || moved.x > 720)  {
-                    clearInterval(movedXInterval);
-                    moved.x = targetX;
-                }
-            }, 4);
-    
-            let targetXInterval = setInterval(() => {
-                target.x -= 3; 
-                if (Math.floor(target.x) <= movedX || target.x < 0)  {
-                    clearInterval(targetXInterval);
-                    target.x = movedX;
-                }
-            }, 4);
-        }else if (moveLeft){
-            let movedXInterval = setInterval(() => {
-                moved.x -= 3; 
-                if (Math.floor(moved.x) <= targetX || moved.x > 720)  {
-                    clearInterval(movedXInterval);
-                    moved.x = targetX;
-                }
-            }, 4);
-    
-            let targetXInterval = setInterval(() => {
-                target.x += 3; 
-                if (Math.floor(target.x) >= movedX || target.x < 0)  {
-                    clearInterval(targetXInterval);
-                    target.x = movedX;
-                }
-            }, 4);
-        }else if (moveUp){
-            let movedYInterval = setInterval(() => {
-                moved.y -= 3; 
-                if (Math.floor(moved.y) <= targetY || moved.y < 0){
-                    clearInterval(movedYInterval);
-                    moved.y = targetY;
-                }
-            }, 4);
-    
-            let targetYInterval = setInterval(() => {
-                target.y += 3; 
-                if (Math.floor(target.y) >= movedY || target.y > 1280){
-                    clearInterval(targetYInterval);
-                    target.y = movedY;
-                }
-            }, 4);
-        }else if (moveDown){
-            let movedYInterval = setInterval(() => {
-                moved.y += 3; 
-                if (Math.floor(moved.y) >= targetY || moved.y > 1280){
-                    clearInterval(movedYInterval);
-                    moved.y = targetY;
-                }
-            }, 4);
-    
-            let targetYInterval = setInterval(() => {
-                target.y -= 3; 
-                if (Math.floor(target.y) <= movedY || target.y < 0){
-                    clearInterval(targetYInterval);
-                    target.y = movedY;
-                }
-            }, 4);
-        }
+        return new Promise((resolve, reject) => {
+            if (moveRight){
+                let movedXInterval = setInterval(() => {
+                    moved.x += 3; 
+                    if (Math.floor(moved.x) >= targetX || moved.x > 720)  {
+                        clearInterval(movedXInterval);
+                        moved.x = targetX;
+                    }
+                }, 4);
+        
+                let targetXInterval = setInterval(() => {
+                    target.x -= 3; 
+                    if (Math.floor(target.x) <= movedX || target.x < 0)  {
+                        clearInterval(targetXInterval);
+                        target.x = movedX;
+                    }
+                }, 4);
+
+                resolve({"moved": moved, "movedTo": target, "movement": "right"});
+            }else if (moveLeft){
+                let movedXInterval = setInterval(() => {
+                    moved.x -= 3; 
+                    if (Math.floor(moved.x) <= targetX || moved.x > 720)  {
+                        clearInterval(movedXInterval);
+                        moved.x = targetX;
+                    }
+                }, 4);
+        
+                let targetXInterval = setInterval(() => {
+                    target.x += 3; 
+                    if (Math.floor(target.x) >= movedX || target.x < 0)  {
+                        clearInterval(targetXInterval);
+                        target.x = movedX;
+                    }
+                }, 4);
+                resolve({"moved": moved, "movedTo": target, "movement": "left"});
+            }else if (moveUp){
+                let movedYInterval = setInterval(() => {
+                    moved.y -= 3; 
+                    if (Math.floor(moved.y) <= targetY || moved.y < 0){
+                        clearInterval(movedYInterval);
+                        moved.y = targetY;
+                    }
+                }, 4);
+        
+                let targetYInterval = setInterval(() => {
+                    target.y += 3; 
+                    if (Math.floor(target.y) >= movedY || target.y > 1280){
+                        clearInterval(targetYInterval);
+                        target.y = movedY;
+                    }
+                }, 4);
+                resolve({"moved": moved, "movedTo": target, "movement": "top"});
+            }else if (moveDown){
+                let movedYInterval = setInterval(() => {
+                    moved.y += 3; 
+                    if (Math.floor(moved.y) >= targetY || moved.y > 1280){
+                        clearInterval(movedYInterval);
+                        moved.y = targetY;
+                    }
+                }, 4);
+        
+                let targetYInterval = setInterval(() => {
+                    target.y -= 3; 
+                    if (Math.floor(target.y) <= movedY || target.y < 0){
+                        clearInterval(targetYInterval);
+                        target.y = movedY;
+                    }
+                }, 4);
+                resolve({"moved": moved, "movedTo": target, "movement": "down"});
+            }else if (noMovement){
+                resolve({"moved": null, "movedTo": null, "movement": null});
+            }
+
+        });
+    }
+
+    swap(arr, index1, index2) {
+        let temp = arr[index1];
+        arr[index1] = arr[index2];
+        arr[index2] = temp;
     }
 }
