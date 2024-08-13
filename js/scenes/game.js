@@ -1,4 +1,4 @@
-const CANDY_NAMES = ['candy1', 'candy2', 'candy3', 'candy4', 'candy5'];
+const CANDY_NAMES = ['Blueberry', 'Gauva', 'JavaPlum', 'Mango', 'Strawberry'];
 
 // POSITIONS
 const CANDY_SPACING = 175;
@@ -22,6 +22,7 @@ export class Game extends Phaser.Scene {
         while (candy_count < 28){
             candy = this.physics.add.sprite(spacing_x, spacing_y, CANDY_NAMES[this.getRandomInt(CANDY_NAMES.length)]).setScale(.29);
             candy.name = candy_count;
+            candy.flavor  = candy.texture.key;
             candies.push(candy);
 
             spacing_x += CANDY_SPACING;
@@ -53,7 +54,10 @@ export class Game extends Phaser.Scene {
                         this.candyMove(draggedCandy, gameObject)
                         .then((result) => {
                             if(result.movement){
-                                setTimeout(() => { return this.candyMove(result.movedTo, result.moved); }, 500);
+                                this.scoreFinder(result.moved);
+                                // setTimeout(() => { 
+                                //     return this.candyMove(result.movedTo, result.moved); 
+                                // }, 500);
                             }
                         })
                         .then((reverseResult) => {
@@ -186,5 +190,36 @@ export class Game extends Phaser.Scene {
         let temp = arr[index1];
         arr[index1] = arr[index2];
         arr[index2] = temp;
+    }
+
+    scoreFinder(movedCandy){ 
+        let scoreCandy = movedCandy;
+
+        // Y axis
+        let cont = movedCandy.name + 4;
+        let verticalFlavors = [];
+
+        while(cont < candies.length){
+            if (scoreCandy.flavor === candies[cont].flavor){
+
+                scoreCandy.setTint(0xff0000);
+                candies[cont].setTint(0xff0000);
+
+                // verticalFlavors.push(candies[cont]);
+                cont += 4;
+            }
+            else {
+                break;
+            }
+
+
+            console.log(cont);
+        }
+
+        // if (verticalFlavors.length >= 2){
+        //     verticalFlavors.forEach((candy) => {
+        //         candy.destroy();
+        //     });
+        // }
     }
 }
