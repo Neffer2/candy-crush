@@ -195,31 +195,46 @@ export class Game extends Phaser.Scene {
     scoreFinder(movedCandy){ 
         let scoreCandy = movedCandy;
 
-        // Y axis
-        let cont = movedCandy.name + 4;
-        let verticalFlavors = [];
+        // Y axis down
+        let cont = scoreCandy.name + 4;
+        let verticalFlavors = []; 
 
-        while(cont < candies.length){
+        // while(cont < candies.length){
+        //     if (scoreCandy.flavor === candies[cont].flavor){
+        //         scoreCandy.setTint(0xff0000);
+        //         candies[cont].setTint(0xff0000);
+        //         cont += 4;
+        //     }
+        //     else {
+        //         break;
+        //     }
+        // }
+        
+        // Y axis up
+        cont = scoreCandy.name - 4;
+        verticalFlavors = []; 
+
+        console.log("Moved", scoreCandy.name);
+        console.log("Cont", cont);
+
+        while(cont > 0){
             if (scoreCandy.flavor === candies[cont].flavor){
+
+                console.log(scoreCandy.flavor + " === " + candies[cont].flavor);
+                console.log(scoreCandy.name + " === " + candies[cont].name);
+                console.log(cont)
+                
+                candies.forEach((candy) => {
+                    console.log(candy.name, candy.flavor);
+                });
 
                 scoreCandy.setTint(0xff0000);
                 candies[cont].setTint(0xff0000);
-
-                // verticalFlavors.push(candies[cont]);
-                cont += 4;
+                cont -= 4;
             }
             else {
                 break;
             }
-
-
-            console.log(cont);
         }
-
-        // if (verticalFlavors.length >= 2){
-        //     verticalFlavors.forEach((candy) => {
-        //         candy.destroy();
-        //     });
-        // }
     }
 }
