@@ -1,4 +1,4 @@
-const CANDY_NAMES = ['Blueberry', 'Gauva', 'JavaPlum', 'Mango', 'Strawberry'];
+const CANDY_FALVORS = ['Blueberry', 'Gauva', 'JavaPlum', 'Mango', 'Strawberry'];
 
 // POSITIONS
 const CANDY_SPACING = 175;
@@ -20,8 +20,8 @@ export class Game extends Phaser.Scene {
         let spacing_y = 100;
         let candy_count = 0;
         while (candy_count < 28){
-            candy = this.physics.add.sprite(spacing_x, spacing_y, CANDY_NAMES[this.getRandomInt(CANDY_NAMES.length)]).setScale(.29);
-            candy.name = candy_count;
+            candy = this.physics.add.sprite(spacing_x, spacing_y, CANDY_FALVORS[this.getRandomInt(CANDY_FALVORS.length)]).setScale(.29);
+            candy.key = candy_count;
             candy.flavor  = candy.texture.key;
             candies.push(candy);
 
@@ -54,7 +54,7 @@ export class Game extends Phaser.Scene {
                         this.candyMove(draggedCandy, gameObject)
                         .then((result) => {
                             if(result.movement){
-                                this.scoreFinder(result.moved);
+                                this.scoreFinder();
                                 // setTimeout(() => { 
                                 //     return this.candyMove(result.movedTo, result.moved); 
                                 // }, 500);
@@ -192,49 +192,26 @@ export class Game extends Phaser.Scene {
         arr[index2] = temp;
     }
 
-    scoreFinder(movedCandy){ 
-        let scoreCandy = movedCandy;
-
-        // Y axis down
-        let cont = scoreCandy.name + 4;
-        let verticalFlavors = []; 
-
-        // while(cont < candies.length){
-        //     if (scoreCandy.flavor === candies[cont].flavor){
-        //         scoreCandy.setTint(0xff0000);
-        //         candies[cont].setTint(0xff0000);
-        //         cont += 4;
-        //     }
-        //     else {
-        //         break;
-        //     }
-        // }
+    scoreFinder(key = 0){ 
+        let row = [];
         
-        // Y axis up
-        cont = scoreCandy.name - 4;
-        verticalFlavors = []; 
+        // Define candy rows to be checked
+        for (let i = key; i < candies.length; i+=4){
+            row.push(candies[i]);
+        }   
 
-        console.log("Moved", scoreCandy.name);
-        console.log("Cont", cont);
-
-        while(cont > 0){
-            if (scoreCandy.flavor === candies[cont].flavor){
-
-                console.log(scoreCandy.flavor + " === " + candies[cont].flavor);
-                console.log(scoreCandy.name + " === " + candies[cont].name);
-                console.log(cont)
-                
-                candies.forEach((candy) => {
-                    console.log(candy.name, candy.flavor);
-                });
-
-                scoreCandy.setTint(0xff0000);
-                candies[cont].setTint(0xff0000);
-                cont -= 4;
+        // Check if there are 3 candies with the same flavor
+        let temp = row[0].flavor;   
+        for (let i = 0; i < row.length; i++){
+            if (row[i].flavor === temp){
+                row[i].setScale(.35);
+            }else {
+                temp = row[i].flavor;
             }
-            else {
-                break;
-            }
-        }
+            
+        }   
+
+        // if (key <= 3) 
+        // this.scoreFinder(key+=1);
     }
 }
