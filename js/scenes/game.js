@@ -201,15 +201,27 @@ export class Game extends Phaser.Scene {
         }   
 
         // Check if there are 3 candies with the same flavor
-        let temp = row[0].flavor;   
-        for (let i = 0; i < row.length; i++){
-            if (row[i].flavor === temp){
-                row[i].setScale(.35);
+        let temp = row[0];  
+        let cont = 1; 
+        let candiesInRow = []
+        for (let i = 1; i < row.length; i++){
+            if (row[i].flavor === temp.flavor){
+                candiesInRow.push(temp);
+                candiesInRow.push(row[i]);
+                cont++;
             }else {
-                temp = row[i].flavor;
+                temp = row[i];
+                cont = 0;
             }
-            
-        }   
+
+            if (cont >= 3){
+                candiesInRow.forEach(candy => {
+                    candy.setScale(.35);
+                }, mContext);
+            }
+        }
+
+        // console.log(cont);
 
         // if (key <= 3) 
         // this.scoreFinder(key+=1);
