@@ -1,4 +1,4 @@
-const CANDY_FALVORS = ['Blueberry', 'Gauva', 'JavaPlum', 'Mango', 'Strawberry'];
+const CANDY_FALVORS = ['MoraAzul', 'Limon', 'Mora', 'Mango', 'Fresa'];
 
 // POSITIONS
 const CANDY_SPACING = 175;
@@ -192,38 +192,28 @@ export class Game extends Phaser.Scene {
         arr[index2] = temp;
     }
 
-    scoreFinder(key = 0){ 
-        let row = [];
-        
-        // Define candy rows to be checked
-        for (let i = key; i < candies.length; i+=4){
-            row.push(candies[i]);
-        }   
+    scoreFinder(){ 
+        let sameCandies = [];
+        let candy;
 
-        // Check if there are 3 candies with the same flavor
-        let temp = row[0];  
-        let cont = 1; 
-        let candiesInRow = []
-        for (let i = 1; i < row.length; i++){
-            if (row[i].flavor === temp.flavor){
-                candiesInRow.push(temp);
-                candiesInRow.push(row[i]);
-                cont++;
-            }else {
-                temp = row[i];
-                cont = 0;
-            }
+        // Horizontal
+        for (let i = 0; i < candies.length; i++){
+            candy = candies[i];
+            sameCandies.push(candy);
 
-            if (cont >= 3){
-                candiesInRow.forEach(candy => {
-                    candy.setScale(.35);
-                }, mContext);
+            for(let j = (i + 4); j < candies.length; j+=4){
+                if (candy.flavor === candies[j].flavor && j < 28){
+                    sameCandies.push(candies[j]);
+                }else {
+                    if (sameCandies.length > 2){
+                        sameCandies.forEach((candy) => {
+                            candy.setTint(0xff0000);
+                        });
+                    }
+                    sameCandies = [];
+                    break;
+                }
             }
         }
-
-        // console.log(cont);
-
-        // if (key <= 3) 
-        // this.scoreFinder(key+=1);
     }
 }

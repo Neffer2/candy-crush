@@ -26,11 +26,11 @@ export class Preloader extends Phaser.Scene {
     preload ()
     {
         this.load.setPath('public/assets');
-        this.load.image('Blueberry', 'RoundCandy_Blueberry.png');
-        this.load.image('Gauva', 'RoundCandy_Gauva.png');
-        this.load.image('JavaPlum', 'RoundCandy_JavaPlum.png');
+        this.load.image('MoraAzul', 'RoundCandy_Blueberry.png');
+        this.load.image('Limon', 'RoundCandy_Gauva.png');
+        this.load.image('Mora', 'RoundCandy_JavaPlum.png');
         this.load.image('Mango', 'RoundCandy_Mango.png');
-        this.load.image('Strawberry', 'RoundCandy_Strawberry.png');
+        this.load.image('Fresa', 'RoundCandy_Strawberry.png');
     }
 
     create ()
