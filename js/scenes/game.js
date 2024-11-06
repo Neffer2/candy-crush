@@ -36,6 +36,10 @@ export class Game extends Phaser.Scene {
     }
 
     create (){
+
+        setTimeout(() => {
+            this.scoreFinder();
+        }, 5000);
         mContext = this;
         let draggedCandy;
         
@@ -205,15 +209,18 @@ export class Game extends Phaser.Scene {
                 if (candy.flavor === candies[j].flavor && j < 28){
                     sameCandies.push(candies[j]);
                 }else {
-                    if (sameCandies.length > 2){
-                        sameCandies.forEach((candy) => {
-                            candy.setTint(0xff0000);
-                        });
-                    }
-                    sameCandies = [];
                     break;
                 }
             }
+            
+            if (sameCandies.length > 2){
+                console.log(sameCandies);
+                sameCandies.forEach((_candy) => {
+                    console.log('Candy:', _candy.flavor);
+                    _candy.setScale(.5);
+                });
+            }
+            sameCandies = [];
         }
     }
 }
