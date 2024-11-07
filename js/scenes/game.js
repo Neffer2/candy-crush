@@ -36,12 +36,12 @@ export class Game extends Phaser.Scene {
     }
 
     create (){
-
-        setTimeout(() => {
-            this.scoreFinder();
-        }, 5000);
         mContext = this;
         let draggedCandy;
+
+        setTimeout(() => {
+            // this.scoreFinder();
+        }, 500);
         
         candies.forEach((candy) => { 
             candy.setInteractive({ draggable: true , dropZone: true });
@@ -58,7 +58,12 @@ export class Game extends Phaser.Scene {
                         this.candyMove(draggedCandy, gameObject)
                         .then((result) => {
                             if(result.movement){
-                                this.scoreFinder();
+                                // console.log(result.movement);
+                                setTimeout(() => {
+                                    this.scoreFinder();
+                                }, 500);
+                                // console.log(candies);
+
                                 // setTimeout(() => { 
                                 //     return this.candyMove(result.movedTo, result.moved); 
                                 // }, 500);
@@ -90,7 +95,6 @@ export class Game extends Phaser.Scene {
         let targetX = target.x;
         let targetY = target.y;   
 
-        this.swap(candies, moved.name, target.name);
         // Movements
         let moveRight = false, moveLeft = false, moveUp = false, moveDown = false, noMovement = false;
 
@@ -163,9 +167,9 @@ export class Game extends Phaser.Scene {
                     if (Math.floor(target.y) >= movedY || target.y > 1280){
                         clearInterval(targetYInterval);
                         target.y = movedY;
+                        resolve({"moved": moved, "movedTo": target, "movement": "top"});
                     }
                 }, 4);
-                resolve({"moved": moved, "movedTo": target, "movement": "top"});
             }else if (moveDown){
                 let movedYInterval = setInterval(() => {
                     moved.y += 3; 
@@ -180,13 +184,17 @@ export class Game extends Phaser.Scene {
                     if (Math.floor(target.y) <= movedY || target.y < 0){
                         clearInterval(targetYInterval);
                         target.y = movedY;
+                        resolve({"moved": moved, "movedTo": target, "movement": "down"});
                     }
                 }, 4);
-                resolve({"moved": moved, "movedTo": target, "movement": "down"});
+
             }else if (noMovement){
                 resolve({"moved": null, "movedTo": null, "movement": null});
             }
 
+            if (!noMovement){
+                this.swap(candies, moved.key, target.key);
+            }
         });
     }
 
@@ -196,7 +204,7 @@ export class Game extends Phaser.Scene {
         arr[index2] = temp;
     }
 
-    scoreFinder(){ 
+    scoreFinder(){
         let sameCandies = [];
         let candy;
 
@@ -214,9 +222,28 @@ export class Game extends Phaser.Scene {
             }
             
             if (sameCandies.length > 2){
-                console.log(sameCandies);
                 sameCandies.forEach((_candy) => {
-                    console.log('Candy:', _candy.flavor);
+                    _candy.setScale(.5);
+                });
+            }
+            sameCandies = [];
+        }
+
+        // Vertical
+        for (let i = 0; i < candies.length; i++){
+            candy = candies[i];
+            sameCandies.push(candy);
+
+            for(let j = (i + 1); j < candies.length; j+=1){
+                if (candy.flavor === candies[j].flavor && j % 4 != 0){
+                    sameCandies.push(candies[j]);
+                }else {
+                    break;
+                }
+            }
+            
+            if (sameCandies.length > 2){
+                sameCandies.forEach((_candy) => {
                     _candy.setScale(.5);
                 });
             }
