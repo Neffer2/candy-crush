@@ -38,10 +38,7 @@ export class Game extends Phaser.Scene {
     create (){
         mContext = this;
         let draggedCandy;
-
-        setTimeout(() => {
-            // this.scoreFinder();
-        }, 500);
+        setTimeout(() => { this.scoreFinder(); }, 1000);
         
         candies.forEach((candy) => { 
             candy.setInteractive({ draggable: true , dropZone: true });
@@ -205,9 +202,13 @@ export class Game extends Phaser.Scene {
     }
 
     scoreFinder(){
+
+        // Problemas con las secunecias de ejecucion
+        
         let sameCandies = [];
         let candy;
-
+        let globalSameCandies = [];
+        
         // Horizontal
         for (let i = 0; i < candies.length; i++){
             candy = candies[i];
@@ -222,9 +223,11 @@ export class Game extends Phaser.Scene {
             }
             
             if (sameCandies.length > 2){
-                sameCandies.forEach((_candy) => {
-                    _candy.setScale(.5);
+                sameCandies.forEach((candy) => {
+                    this.changeCandy(candy);
                 });
+
+                globalSameCandies += sameCandies.length;
             }
             sameCandies = [];
         }
@@ -243,11 +246,32 @@ export class Game extends Phaser.Scene {
             }
             
             if (sameCandies.length > 2){
-                sameCandies.forEach((_candy) => {
-                    _candy.setScale(.5);
+                sameCandies.forEach((candy) => {
+                    mContext.changeCandy(candy);
                 });
+
+                globalSameCandies += sameCandies.length;
             }
             sameCandies = [];
         }
+
+        if (globalSameCandies > 0){
+            globalSameCandies = 0;
+            setTimeout(() => {
+                this.scoreFinder();
+            }, 1000);
+        }
+    }
+
+    changeCandy(candy){
+        candy.alpha = 0;
+        setTimeout(() => {
+            let flavor = CANDY_FALVORS[this.getRandomInt(CANDY_FALVORS.length)];
+            candy.setTexture(flavor);
+            candy.flavor = flavor;
+            candy.alpha = 1;
+        }, 1000);
+
+        return true;
     }
 }
