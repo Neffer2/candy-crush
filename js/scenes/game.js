@@ -38,7 +38,7 @@ export class Game extends Phaser.Scene {
     create (){
         mContext = this;
         let draggedCandy;
-        setTimeout(() => { this.scoreFinder(); }, 1000);
+        // setTimeout(() => { this.scoreFinder(); }, 1000);
         
         candies.forEach((candy) => { 
             candy.setInteractive({ draggable: true , dropZone: true });
@@ -56,10 +56,7 @@ export class Game extends Phaser.Scene {
                         .then((result) => {
                             if(result.movement){
                                 // console.log(result.movement);
-                                setTimeout(() => {
-                                    this.scoreFinder();
-                                }, 500);
-                                // console.log(candies);
+                                mContext.scoreFinderVertical()
 
                                 // setTimeout(() => { 
                                 //     return this.candyMove(result.movedTo, result.moved); 
@@ -201,10 +198,43 @@ export class Game extends Phaser.Scene {
         arr[index2] = temp;
     }
 
-    scoreFinder(){
+    async scoreFinderVertical(){
+        let sameCandies = [];
+        let candy;
+        let globalSameCandies = 0;
 
-        // Problemas con las secunecias de ejecucion
-        
+        // Vertical
+        for (let i = 0; i < candies.length; i++){
+            candy = candies[i];
+            sameCandies.push(candy);
+
+            for(let j = (i + 1); j < candies.length; j+=1){
+                if (candy.flavor === candies[j].flavor && j % 4 != 0){
+                    sameCandies.push(candies[j]);
+                }else {
+                    break;
+                }
+            }
+            
+            if (sameCandies.length > 2){
+                sameCandies = await mContext.changeCandies(sameCandies);
+                console.log("Dulces cambiados");
+
+                globalSameCandies += sameCandies.length;
+            }
+            sameCandies = [];
+        }
+
+        if (globalSameCandies > 0){
+            globalSameCandies = 0;
+            console.log('Yo inicio');
+            // mContext.scoreFinderVertical();
+        }else {
+            console.log('No hay mas movimientos');
+        }
+    }
+
+    scoreFinderHorizontal(){
         let sameCandies = [];
         let candy;
         let globalSameCandies = [];
@@ -232,29 +262,6 @@ export class Game extends Phaser.Scene {
             sameCandies = [];
         }
 
-        // Vertical
-        for (let i = 0; i < candies.length; i++){
-            candy = candies[i];
-            sameCandies.push(candy);
-
-            for(let j = (i + 1); j < candies.length; j+=1){
-                if (candy.flavor === candies[j].flavor && j % 4 != 0){
-                    sameCandies.push(candies[j]);
-                }else {
-                    break;
-                }
-            }
-            
-            if (sameCandies.length > 2){
-                sameCandies.forEach((candy) => {
-                    mContext.changeCandy(candy);
-                });
-
-                globalSameCandies += sameCandies.length;
-            }
-            sameCandies = [];
-        }
-
         if (globalSameCandies > 0){
             globalSameCandies = 0;
             setTimeout(() => {
@@ -263,14 +270,17 @@ export class Game extends Phaser.Scene {
         }
     }
 
-    changeCandy(candy){
-        candy.alpha = 0;
-        setTimeout(() => {
-            let flavor = CANDY_FALVORS[this.getRandomInt(CANDY_FALVORS.length)];
-            candy.setTexture(flavor);
-            candy.flavor = flavor;
-            candy.alpha = 1;
-        }, 1000);
+    async changeCandies(sameCandies){
+        sameCandies.forEach((candy) => {
+            candy.setScale(.5);
+            // candy.alpha = 0;
+            setTimeout(() => {
+                let flavor = CANDY_FALVORS[this.getRandomInt(CANDY_FALVORS.length)];
+                candy.setTexture(flavor);
+                candy.flavor = flavor;
+                candy.alpha = 1;
+            }, 1000);
+        });
 
         return true;
     }
