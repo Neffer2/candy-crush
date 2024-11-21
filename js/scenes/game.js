@@ -56,7 +56,7 @@ export class Game extends Phaser.Scene {
                         .then((result) => {
                             if(result.movement){
                                 // console.log(result.movement);
-                                mContext.scoreFinderVertical()
+                                mContext.scoreFinder();
 
                                 // setTimeout(() => { 
                                 //     return this.candyMove(result.movedTo, result.moved); 
@@ -198,90 +198,99 @@ export class Game extends Phaser.Scene {
         arr[index2] = temp;
     }
 
-    async scoreFinderVertical(){
-        let sameCandies = [];
-        let candy;
-        let globalSameCandies = 0;
-
-        // Vertical
-        for (let i = 0; i < candies.length; i++){
-            candy = candies[i];
-            sameCandies.push(candy);
-
-            for(let j = (i + 1); j < candies.length; j+=1){
-                if (candy.flavor === candies[j].flavor && j % 4 != 0){
-                    sameCandies.push(candies[j]);
-                }else {
-                    break;
+    scoreFinderVertical(){
+        return new Promise((resolve, reject) => {
+            let sameCandies = [], candy, promises = [];
+    
+            // Vertical
+            for (let i = 0; i < candies.length; i++){
+                candy = candies[i];
+                sameCandies.push(candy);
+                
+                for(let j = (i + 1); j < candies.length; j+=1){
+                    if (candy.flavor === candies[j].flavor && j % 4 != 0){
+                        sameCandies.push(candies[j]);
+                    }else {
+                        break;
+                    }
                 }
+                
+                if (sameCandies.length > 2){
+                        promises.push(new Promise((resolve) => {
+                            mContext.changeCandies(sameCandies)
+                            .then((result) => {
+                                resolve();
+                            });
+                        }));
+                    }
+                    sameCandies = [];
             }
-            
-            if (sameCandies.length > 2){
-                sameCandies = await mContext.changeCandies(sameCandies);
-                console.log("Dulces cambiados");
 
-                globalSameCandies += sameCandies.length;
-            }
-            sameCandies = [];
-        }
+            Promise.all(promises).then(() => {
+                resolve("Operación Vertical completada");
+            });
+        });
+    }
 
-        if (globalSameCandies > 0){
-            globalSameCandies = 0;
-            console.log('Yo inicio');
-            // mContext.scoreFinderVertical();
-        }else {
-            console.log('No hay mas movimientos');
-        }
+    scoreFinder(){
+        let promises = [];
+        promises.push(mContext.scoreFinderVertical());
+        promises.push(mContext.scoreFinderHorizontal());
+
+        Promise.all(promises).then((result) => {
+            console.log(result);
+        });
     }
 
     scoreFinderHorizontal(){
-        let sameCandies = [];
-        let candy;
-        let globalSameCandies = [];
-        
-        // Horizontal
-        for (let i = 0; i < candies.length; i++){
-            candy = candies[i];
-            sameCandies.push(candy);
+        return new Promise((resolve, reject) => {
+            let sameCandies = [], candy, promises = [];
 
-            for(let j = (i + 4); j < candies.length; j+=4){
-                if (candy.flavor === candies[j].flavor && j < 28){
-                    sameCandies.push(candies[j]);
-                }else {
-                    break;
+            // Horizontal
+            for (let i = 0; i < candies.length; i++){
+                candy = candies[i];
+                sameCandies.push(candy);
+    
+                for(let j = (i + 4); j < candies.length; j+=4){
+                    if (candy.flavor === candies[j].flavor && j < 28){
+                        sameCandies.push(candies[j]);
+                    }else {
+                        break;
+                    }
                 }
+                
+                if (sameCandies.length > 2){
+                    promises.push(new Promise((resolve) => {
+                        mContext.changeCandies(sameCandies)
+                        .then((result) => {
+                            resolve();
+                        });
+                    }));
+                }
+                sameCandies = [];
             }
-            
-            if (sameCandies.length > 2){
-                sameCandies.forEach((candy) => {
-                    this.changeCandy(candy);
-                });
 
-                globalSameCandies += sameCandies.length;
-            }
-            sameCandies = [];
-        }
-
-        if (globalSameCandies > 0){
-            globalSameCandies = 0;
-            setTimeout(() => {
-                this.scoreFinder();
-            }, 1000);
-        }
+            Promise.all(promises).then(() => {
+                resolve("Operación Horizontal completada");
+            });
+        });
     }
 
-    async changeCandies(sameCandies){
-        sameCandies.forEach((candy) => {
-            candy.setScale(.5);
-            // candy.alpha = 0;
-            setTimeout(() => {
-                let flavor = CANDY_FALVORS[this.getRandomInt(CANDY_FALVORS.length)];
-                candy.setTexture(flavor);
-                candy.flavor = flavor;
-                candy.alpha = 1;
-            }, 1000);
+    changeCandies(sameCandies) {
+        return new Promise((resolve, reject) => {
+            let promises = sameCandies.map((candy) => {
+                return new Promise((resolve) => {
+                    candy.alpha = 0;
+                    let flavor = CANDY_FALVORS[this.getRandomInt(CANDY_FALVORS.length)];
+                    candy.setTexture(flavor);
+                    candy.flavor = flavor;
+                    setTimeout(() => {candy.alpha = 1;resolve();}, 500);
+                });
+            });
+            
+            Promise.all(promises).then(() => {
+                resolve('Candies changed');
+            });
         });
-
-        return true;
     }
 }
